@@ -85,6 +85,10 @@ function Symbolfile:writeheader()
 		self:writeinclude()
 		self.out:write(include.header, '\n\n')
 		self.out:flush()
+		if self.hdr then
+			self.hdr:write(include.header, '\n\n')
+			self.hdr:flush()
+		end
 		self.headerwritten = true
 	end
 end
@@ -92,6 +96,10 @@ function Symbolfile:writeinclude()
 	if not self.includewritten then
 		self.out:write(include.include, '\n\n')
 		self.out:flush()
+		if self.hdr then
+			self.hdr:write(include.include, '\n\n')
+			self.hdr:flush()
+		end
 		self.includewritten = true
 	end
 end
