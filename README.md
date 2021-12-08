@@ -13,9 +13,9 @@ filesymbol -o OUTFILE [-i HEADERFILE] [-r RAWFILE NAME]... [-R RAWFILE NAME]... 
 ```
 
 ### Examples
-Package the `filesymbol`, `include` and `bin` directories, along with the rockspec:
+Package the `filesymbol`, and `bin` directories, along with the rockspec:
 ```
-filesymbol -o filesymbol.c -i filesymbol.h include bin filesymbol *.rockspec
+filesymbol -o filesymbol.c -i filesymbol.h bin filesymbol *.rockspec
 ```
 
 Package the readme as the `readme` symbol, and compile it to the `readme.o` object file, without anything else:

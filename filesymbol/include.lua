@@ -1,8 +1,12 @@
-return [[
+return {
+
+include = [[
+#include <stddef.h>
+]],
+
+header = [[
 #ifndef __FILESYMBOL_H
 #define __FILESYMBOL_H
-
-#include <stddef.h>
 
 typedef struct filesymbol_t filesymbol_t;
 
@@ -25,9 +29,17 @@ struct filesymbol_t {
 };
 
 #endif
+]],
+
+helper = [[
+#ifndef __FILESYMBOL_HELPER_H
+#define __FILESYMBOL_HELPER_H
 
 static void filesymbol_noinit(filesymbol_t* none) {
 	(void)(none);
 }
 
-]]
+#endif
+]],
+
+}

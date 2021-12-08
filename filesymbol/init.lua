@@ -1,6 +1,7 @@
 local gensymbol = require 'filesymbol.gensymbol'
 local genrawsymbol = require 'filesymbol.genrawsymbol'
-local header = require 'filesymbol.header'
+
+local include = require 'filesymbol.include'
 
 local Symbolfile = {}
 Symbolfile.__index = Symbolfile
@@ -16,11 +17,9 @@ function Symbolfile:__call(outfile, hdrfile)
 		file.out = outfile
 		file.close = true
 	end
-	file.out:write(header, '\n\n')
 
 	if type(hdrfile) == 'string' then
 		file.hdr = assert(io.open(hdrfile, 'wb'))
-		file.hdr:write(header, '\n\n')
 	else
 		file.hdr = false
 	end
@@ -32,6 +31,9 @@ function Symbolfile:__call(outfile, hdrfile)
 		filesymbol_data_t=true,
 		filesymbol_noinit=true,
 	}
+	file.includewritten = false
+	file.headerwritten = false
+	file.helperwritten = false
 
 	return file
 end
@@ -41,6 +43,7 @@ function Symbolfile:add(path, name, filename)
 		error("Symbolfile:add(path: string, name: string?, filename: string?)")
 	end
 	self:checkopen()
+	self:writehelper()
 
 	return gensymbol(self.out, self.hdr, path, name, filename, self.taken)
 end
@@ -50,6 +53,8 @@ function Symbolfile:addraw(path, name, genlen)
 		error("Symbolfile:addraw(path: string, name: string, genlen: boolean?)")
 	end
 	self:checkopen()
+	self:writeinclude()
+
 	return genrawsymbol(self.out, self.hdr, path, name, genlen, self.taken)
 end
 
@@ -64,6 +69,30 @@ function Symbolfile:finish()
 			assert(self.hdr:close())
 			self.hdr = nil
 		end
+	end
+end
+
+function Symbolfile:writehelper()
+	if not self.helperwritten then
+		self:writeheader()
+		self.out:write(include.helper, '\n\n')
+		self.out:flush()
+		self.helperwritten = true
+	end
+end
+function Symbolfile:writeheader()
+	if not self.headerwritten then
+		self:writeinclude()
+		self.out:write(include.header, '\n\n')
+		self.out:flush()
+		self.headerwritten = true
+	end
+end
+function Symbolfile:writeinclude()
+	if not self.includewritten then
+		self.out:write(include.include, '\n\n')
+		self.out:flush()
+		self.includewritten = true
 	end
 end
 
