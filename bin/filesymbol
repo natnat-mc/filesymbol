@@ -1,0 +1,66 @@
+#!/usr/bin/env lua
+
+local Symbolfile = require 'filesymbol'
+
+local outfile, hdrfile
+local files, rawfileslen, rawfiles, namedfiles = {}, {}, {}, {}
+
+while #arg ~= 0 do
+	local a = table.remove(arg, 1)
+
+	if a == "-h" or a == "--help" then
+		print("filesymbol -o OUTFILE [-i HEADERFILE] [-r RAWFILE NAME]... [-R RAWFILE NAME]... [-f FILE NAME]... FILES...")
+		print("\t-o --out    OUTFILE      - set output file (.c)")
+		print("\t-i --header HEADERFILE   - set output header file (.h)")
+		print("\t-r --rawlen RAWFILE NAME - add raw file as name, with length")
+		print("\t-R --raw    RAWFILE NAME - add raw file as name, without length")
+		print("\t-f --file   FILE NAME    - add file hierarchy to output")
+		print("\tFILES                    - add file hierarchy to output, named by path")
+		return
+	elseif a == "-o" or a == "--out" then
+		outfile = table.remove(arg, 1) or error("-o/--out must take an argument")
+	elseif a == "-i" or a == "--header" then
+		hdrfile = table.remove(arg, 1) or error("-i/--header must take an argument")
+	elseif a == "-r" or a == "--rawlen" then
+		local path = table.remove(arg, 1) or error("-r/--rawlen must take two arguments")
+		local name = table.remove(arg, 1) or error("-r/--rawlen must take two arguments")
+		rawfileslen[name] = path
+	elseif a == "-R" or a == "--raw" then
+		local path = table.remove(arg, 1) or error("-r/--raw must take two arguments")
+		local name = table.remove(arg, 1) or error("-R/--raw must take two arguments")
+		rawfiles[name] = path
+	elseif a == "-f" or a == "--file" then
+		local path = table.remove(arg, 1) or error("-f/--file must take two arguments")
+		local name = table.remove(arg, 1) or error("-f/--file must take two arguments")
+		namedfiles[name] = path
+	else
+		table.insert(files, a)
+	end
+end
+
+if not outfile then
+	error("must take -o/--out -- see --help")
+end
+if outfile == '-' then
+	outfile = io.stdout
+end
+if hdrfile == '-' then
+	hdrfile = io.stdout
+end
+
+local out = Symbolfile(outfile, hdrfile)
+
+for _, file in ipairs(files) do
+	out:add(file)
+end
+for name, file in pairs(rawfileslen) do
+	out:addraw(file, name, true)
+end
+for name, file in pairs(rawfiles) do
+	out:addraw(file, name, false)
+end
+for name, file in pairs(namedfiles) do
+	out:add(file, name)
+end
+
+out:finish()
